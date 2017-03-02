@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    body {
+      background-image: url('./image.jpeg');
+      background-position: bottom;
+    }
+  </style>
+</head>
+<body>
+  <h1>Firma para revelar los implicados!</h1>
+  <div id="Form-container">
+    <div id="message"></div>
+    <div class="Counter">
+      <span>Cantidad de firmas: </span>
+      <span id="cant"></span>
+    </div>
+    <form id="Form">
+      <input id="cedula" type="text" name="cedula" placeholder="Cedula:">
+      <input id="nombre" type="text" name="nombre" placeholder="Nombre:">
+      <input id="email" type="text" name="email" placeholder="Email:">
+      <input id="telefono" type="text" name="telefono" placeholder="Teléfono:">
+      <input id="comentario" type="text" name="comentario" placeholder="Comentario:">
+      <button id="button-register" onclick="registrarFirma(event)">Registar</button>
+    </form>
+    <div id="map" style="height:400px"></div>
+  </div>
+  <script type="text/javascript">
+    var API_KEY = 'AIzaSyBnnazrgGVHmaRIlIFV9X8s4-z0CQtnbLc'
+    var firmas;
+    localStorage.firmas ? firmas = JSON.parse(localStorage.firmas) : firmas = [];
+    var cedula = document.getElementById('cedula');
+    var nombre = document.getElementById('nombre');
+    var email = document.getElementById('email');
+    var telefono = document.getElementById('telefono');
+    var comentario = document.getElementById('comentario');
+    var registerButton = document.getElementById('button-register');
+    var counterCant = document.getElementById('cant');
+    var form = document.getElementById('Form-container')
+
+    counterCant.innerHTML = firmas.length;
+
+    function registrarFirma(event) {
+      event.preventDefault()
+      var firma = {
+        cedula: cedula.value,
+        nombre: nombre.value,
+        email: email.value,
+        telefono: telefono.value,
+        comentario: comentario.value,
+      }
+
+      console.log(firma)
+
+      if (firma.cedula === '' || firma.nombre === '' || firma.email === '' || firma.telefono === '' || firma.comentario === '') {
+        document.getElementById('message').innerHTML = '<p style="color:red">Hay campos vacios!</p>';
+      }
+      else {
+        window.navigator.geolocation.getCurrentPosition(position => {
+          firma.latitude = position.coords.latitude
+          firma.longitude = position.coords.longitude
+          firmas.push(firma);
+          counterCant.innerHTML = firmas.length;
+          localStorage.firmas = JSON.stringify(firmas);
+          document.getElementById("Form").reset()
+        });
+      }
+    }
+
+  </script>
+  <script>
+    function initMap() {
+      var myLatLng = {lat: firmas[0].latitude, lng: firmas[0].longitude};
+
+      // Create a map object and specify the DOM element for display.
+      var map = new google.maps.Map(document.getElementById('map'), {
+        center: myLatLng,
+        scrollwheel: false,
+        zoom: 4
+      });
+
+      // Create a marker and set its position.
+      firmas.forEach((firma, index) => {
+        if (index >= 11) return false;
+        var myLatLng = {lat: firma.latitude, lng: firma.longitude};
+        var marker = new google.maps.Marker({
+          map: map,
+          position: myLatLng,
+          title: 'Hello World!'
+        });
+      });
+    }
+
+  </script>
+
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCo6YLhOtaSxs5-7ji9x_hMHx9BjU_uH1U&callback=initMap"
+        async defer></script>
+
+</body>
+</html>
